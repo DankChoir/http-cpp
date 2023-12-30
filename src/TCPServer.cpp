@@ -1,4 +1,5 @@
 #include "TCPServer.h"
+#include <arpa/inet.h>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -57,8 +58,8 @@ void TCPServer::bindSocket() {
 }
 
 void TCPServer::listenForConnections() {
-  const int connectQueueSize = 10;
-  int listernFailure = listen(serverSocket, connectQueueSize) < 0;
+  const int CONNECT_QUEUE_SIZE = 10;
+  int listernFailure = listen(serverSocket, CONNECT_QUEUE_SIZE) < 0;
 
   if (listernFailure) {
     perror("Error listening for Connections\n");
@@ -81,6 +82,10 @@ void TCPServer::acceptConnections() {
       perror("Error accepting Connections\n");
       exit(EXIT_FAILURE);
     }
+
+    char ipstr[INET_ADDRSTRLEN];
+    inet_ntop(AF_INET, &(clientAddress.sin_addr), ipstr, sizeof(ipstr));
+    std::cout << "Accepted connection from " << ipstr << std::endl;
 
     std::thread clientThread(&TCPServer::handleClient, this, clientSocket);
     clientThread.detach();
