@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <thread>
 #include <unistd.h>
 
 TCPServer::TCPServer(int port) : port(port) {}
@@ -38,9 +39,10 @@ void TCPServer::createSocket() {
 }
 
 void TCPServer::setupServerAddress() {
-  serverAddress.sin_family = AF_INET;  // IPv4 type
-  serverAddress.sin_port = htons(port);
-  serverAddress.sin_addr.s_addr = INADDR_ANY;
+  // Specify Server address structor
+  serverAddress.sin_family = AF_INET;    // IPv4 type
+  serverAddress.sin_port = htons(port);  // convert to host-to-network short
+  serverAddress.sin_addr.s_addr = INADDR_ANY;  // binds to any available address
 }
 
 void TCPServer::bindSocket() {
@@ -80,7 +82,8 @@ void TCPServer::acceptConnections() {
       exit(EXIT_FAILURE);
     }
 
-    handleClient(clientSocket);
+    std::thread clientThread(&TCPServer::handleClient, this, clientSocket);
+    clientThread.detach();
   }
 }
 
@@ -92,6 +95,8 @@ void TCPServer::handleClient(int clientSocket) {
 
   // Receive and echo back data
   while ((bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0)) > 0) {
+    std::cout << "Received message: " << buffer << std::endl;
+
     send(clientSocket, announce, static_cast<size_t>(sizeof(announce)), 0);
     send(clientSocket, buffer, static_cast<size_t>(bytesRead), 0);
   }

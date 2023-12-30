@@ -1,5 +1,5 @@
 CXX = clang++
-CXXFLAGS = -Wall -Wextra --debug -O0 -fsanitize=address
+CXXFLAGS = -Wall -Wextra --debug -O0 -fsanitize=address -lpthread
 
 SRC_DIR = src
 BUILD_DIR = build
